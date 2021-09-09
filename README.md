@@ -3,4 +3,4 @@ A yearly todo list
 
 (Old school project)
 
-![screenshot](https://media.giphy.com/media/WRL7YgP42OKns22wRD/giphy.gif)
+![screenshot](https://res.cloudinary.com/antdke/image/upload/v1631200896/yearly-todo.png)
