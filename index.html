@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .note {
+        width: 150px;
+        height: 150px;
+        margin: 5px;
+        float: left;
+        box-sizing: border-box;
+        padding: 5px;
+        background-color: pink;
+        position: relative;
+      }
+
+      #corkboard {
+        background-image: url("images/corkboard.jpg");
+        min-height: 500px;
+      }
+
+      .tab {
+        display: inline-block;
+        width: 100px;
+        border: 1px solid #ccc;
+        text-align: center;
+        border-radius: 15px 15px 0px 0px;
+        padding: 5px;
+        border-bottom: 0px;
+      }
+
+      .deletebtn {
+        position: absolute;
+        top: -10px;
+        left: 140px;
+      }
+
+      .editbtn {
+        position: absolute;
+        top: -10px;
+        left: 120px;
+      }
+
+      .active {
+        background-color: #ccc;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .deleted {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Yearly To-Do List</h1>
+
+    <div id="controls">
+      <div id="winter" class="tab active" data-mypanel="winterpanel">
+        Winter
+      </div>
+      <div id="spring" class="tab" data-mypanel="springpanel">Spring</div>
+      <div id="summer" class="tab" data-mypanel="summerpanel">Summer</div>
+      <div id="fall" class="tab" data-mypanel="fallpanel">Fall</div>
+
+      <select id="filter">
+        <option value="all">All Tasks</option>
+        <option value="winter">Winter</option>
+        <option value="spring">Spring</option>
+        <option value="summer">Summer</option>
+        <option value="fall">Fall</option>
+      </select>
+
+      <span></span>
+      <button id="delete-multiple">Delete All Visible Notes</button>
+    </div>
+
+    <div id="panels">
+      <div id="winterpanel" class="panel">
+        What is something you want to accomplish this winter?
+        <input type="text" /><button data-mycolor="grey" data-myseason="winter">
+          Add note
+        </button>
+      </div>
+      <div id="springpanel" class="panel hidden">
+        What is something you want to accomplish this spring?
+        <input type="text" value="" /><button
+          data-mycolor="green"
+          data-myseason="spring"
+        >
+          Add note
+        </button>
+      </div>
+      <div id="summerpanel" class="panel hidden">
+        What is something you want to accomplish this summer?
+        <input type="text" /><button
+          data-mycolor="yellow"
+          data-myseason="summer"
+        >
+          Add note
+        </button>
+      </div>
+      <div id="fallpanel" class="panel hidden">
+        What is something you want to accomplish this fall?
+        <input type="text" /><button data-mycolor="brown" data-myseason="fall">
+          Add note
+        </button>
+      </div>
+    </div>
+
+    <div id="corkboard"></div>
+
+    <script>
+      // handle the tabs and when the user clicks on them
+      let allTabs = document.querySelectorAll(".tab");
+
+      // visit all tabs
+      for (let i = 0; i < allTabs.length; i++) {
+        // have each tab listen for a mouse event
+        allTabs[i].onclick = function(event) {
+          // remove the class of active from the other element that currently has it
+          let currentActive = document.querySelector(".active");
+          currentActive.classList.remove("active");
+          event.currentTarget.classList.add("active");
+
+          // hide every panel on the page
+          let allPanels = document.querySelectorAll(".panel");
+          for (let j = 0; j < allPanels.length; j++) {
+            allPanels[j].classList.add("hidden");
+          }
+
+          // show the correct panel that goes along with this season
+          let myPanel = event.currentTarget.dataset.mypanel;
+          document.getElementById(myPanel).classList.remove("hidden");
+        };
+      }
+
+      // grab ref to corkboard
+      let board = document.querySelector("#corkboard");
+
+      // grab a ref to each button on the page
+      let allButtons = document.querySelectorAll("button");
+      for (let i = 0; i < allButtons.length; i++) {
+        // have each button listen for mouse events
+        allButtons[i].onclick = function(event) {
+          // if the button is the delete multiple button
+          if (event.currentTarget.id === "delete-multiple") {
+            for (let j = 0; j < corkboard.children.length; j++) {
+              if (corkboard.children[j].dataset.myseason === filter.value) {
+                corkboard.children[j].classList.add("deleted");
+              } else if (filter.value === "all") {
+                corkboard.children[j].classList.add("deleted");
+              }
+            }
+          }
+          // no note created for input field is empty
+          if (event.currentTarget.previousElementSibling.value) {
+            // create a new note
+            let tempNote = document.createElement("div");
+            tempNote.classList.add("note");
+
+            // grab the color from the button
+            let buttonColor = event.currentTarget.dataset.mycolor;
+            tempNote.style.backgroundColor = buttonColor;
+
+            // add season dataset value to tempNote
+            let btnSeason = event.currentTarget.dataset.myseason;
+            tempNote.setAttribute("data-myseason", btnSeason);
+
+            // grab the text from the previous sibling of the button
+            let noteText = event.currentTarget.previousElementSibling.value;
+            let pTagForNoteText = document.createElement("p");
+            pTagForNoteText.innerHTML = noteText; // Note inner content
+            tempNote.appendChild(pTagForNoteText);
+
+            // put the note into the corkboard
+            corkboard.appendChild(tempNote);
+
+            // create delete button
+            let deleteBtn = document.createElement("img");
+            deleteBtn.src = "./images/delete_button.png";
+            deleteBtn.classList.add("deletebtn");
+            tempNote.appendChild(deleteBtn);
+            deleteBtn.classList.add("hidden");
+
+            // create the edit button
+            let editBtn = document.createElement("img");
+            editBtn.src = "./images/edit_button.png";
+            editBtn.classList.add("editbtn");
+            tempNote.appendChild(editBtn);
+            editBtn.classList.add("hidden");
+
+            // on mouseover
+            tempNote.onmouseover = function(e) {
+              // delete button appears
+              deleteBtn.classList.remove("hidden");
+              // edit button appears
+              editBtn.classList.remove("hidden");
+            };
+
+            // on mouseout
+            tempNote.onmouseout = function(e) {
+              // delete button disappears
+              deleteBtn.classList.add("hidden");
+              // edit button disappears
+              editBtn.classList.add("hidden");
+            };
+
+            // delete button - on click
+            deleteBtn.onclick = function(e) {
+              // remove the note
+              tempNote.classList.add("deleted");
+            };
+
+            // edit button - on click
+            editBtn.onclick = function(e) {
+              let seasonChange = prompt(
+                "Would you like to change the season? Y/N",
+              );
+              if (
+                seasonChange.toLowerCase() === "y" ||
+                seasonChange.toLowerCase() === "yes"
+              ) {
+                let newSeason = prompt(
+                  "Enter the new season you'd like to change this note to.",
+                );
+                if (
+                  newSeason.toLowerCase() === "fall" ||
+                  newSeason.toLowerCase() === "winter" ||
+                  newSeason.toLowerCase() === "spring" ||
+                  newSeason.toLowerCase() === "summer"
+                ) {
+                  tempNote.setAttribute("data-myseason", newSeason);
+                  switch (newSeason) {
+                    case "fall":
+                      tempNote.style.backgroundColor = "brown";
+                      break;
+                    case "winter":
+                      tempNote.style.backgroundColor = "grey";
+                      break;
+                    case "spring":
+                      tempNote.style.backgroundColor = "green";
+                      break;
+                    case "summer":
+                      tempNote.style.backgroundColor = "yellow";
+                      break;
+                  }
+
+                  let edit = prompt(`Editing: "${pTagForNoteText.innerHTML}"`);
+                  pTagForNoteText.innerHTML = edit;
+                }
+              } else if (
+                seasonChange.toLowerCase() === "n" ||
+                seasonChange.toLowerCase() === "no"
+              ) {
+                let edit = prompt(`Editing: "${pTagForNoteText.innerHTML}"`);
+                pTagForNoteText.innerHTML = edit;
+              }
+            };
+          }
+        };
+      }
+
+      // grab a ref to the select element
+      let filter = document.getElementById("filter");
+
+      // on change
+      filter.onchange = function(e) {
+        for (let i = 0; i < corkboard.children.length; i++) {
+          // if the dropdown is on "All Tasks", then show all tasks
+          if (filter.value === "all") {
+            corkboard.children[i].classList.remove("hidden");
+          } else if (corkboard.children[i].dataset.myseason != filter.value) {
+            // else if a note's season does not match the season in the dropdown
+            // then hide that note
+            corkboard.children[i].classList.add("hidden");
+          } else {
+            // else if a note's season *does* match the season in the dropdown, then show it
+            corkboard.children[i].classList.remove("hidden");
+          }
+        }
+      };
+    </script>
+  </body>
+</html>
